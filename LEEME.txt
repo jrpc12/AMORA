@@ -17,3 +17,8 @@ Notas:
 - La página no aparece en buscadores (tiene "noindex").
 - Las tipografías Arvo y Lora se cargan de Google Fonts al abrirla con internet.
 - Para cambiar un texto, abre index.html con cualquier editor de texto y búscalo.
+
+Contador:
+- La carta queda sellada hasta el sábado 7 de noviembre de 2026 a las 12:00 (hora de Cancún).
+- Para cambiar la fecha, abre index.html, busca "APERTURA" y edita la fecha/hora de esa línea.
+  Formato: 2026-11-07T12:00:00-05:00  (el -05:00 es la zona horaria de Cancún).

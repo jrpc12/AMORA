@@ -48,6 +48,23 @@ body.bloqueado{overflow:hidden}
 .sello img{width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
 .sello:focus-visible{outline:3px solid var(--oro-claro);outline-offset:6px}
 .sobre-vista .pista{font-size:18px;font-style:italic;color:#E8DCC0}
+/* contador */
+.espera{display:none;flex-direction:column;align-items:center;gap:14px}
+#carta.cerrada .espera{display:flex}
+#carta.cerrada .pista{display:none}
+#carta.cerrada .sello{animation:none;cursor:default}
+#carta.cerrada .sello img{filter:grayscale(.35) drop-shadow(0 6px 10px rgba(0,0,0,.25));opacity:.85}
+.espera .msg{font-size:18px;font-style:italic;color:#E8DCC0}
+.reloj{display:flex;gap:10px}
+.reloj div{min-width:72px;padding:12px 8px 10px;border-radius:14px;background:var(--verde-2);border:1px solid var(--verde-borde)}
+.reloj b{display:block;font-family:var(--arvo);font-size:32px;line-height:1;color:var(--crema);font-variant-numeric:tabular-nums}
+.reloj span{display:block;margin-top:6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--oro-claro)}
+.espera .cuando{font-size:15px;color:#E8DCC0}
+.aviso{min-height:24px;font-size:15px;color:var(--oro-claro);opacity:0;transition:opacity .3s}
+.aviso.ver{opacity:1}
+@keyframes tiembla{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.sello.tiembla{animation:tiembla .45s ease-in-out!important}
+@media (min-width:900px){.reloj div{min-width:92px}.reloj b{font-size:40px}}
 .carta-vista{display:none;width:100%;max-width:460px;flex-direction:column;align-items:center;text-align:center;gap:22px}
 #carta.abierta .sobre-vista{display:none}
 #carta.abierta .carta-vista{display:flex;animation:aparece .7s ease-out both}
@@ -194,6 +211,16 @@ body.bloqueado{overflow:hidden}
         <button class="sello" id="abrir" aria-label="Abrir la carta"><img src="img/sello.webp" alt=""></button>
       </div>
       <p class="pista">Toca el sello de la abejita<br>para abrir tu carta.</p>
+      <div class="espera" aria-live="polite">
+        <p class="msg">Tu carta todavía está guardada.<br>Se abrirá en…</p>
+        <div class="reloj" role="timer">
+          <div><b id="hh">00</b><span>horas</span></div>
+          <div><b id="mm">00</b><span>min</span></div>
+          <div><b id="ss">00</b><span>seg</span></div>
+        </div>
+        <p class="cuando">Sábado 7 de noviembre · 12:00 del mediodía</p>
+        <p class="aviso" id="aviso">Paciencia, como la abejita… ya casi.</p>
+      </div>
     </div>
 
     <div class="carta-vista">
@@ -308,6 +335,7 @@ body.bloqueado{overflow:hidden}
             <div><svg width="24" height="24" viewBox="0 0 44 44" class="hex" aria-hidden="true"><path d="M22 3L39 12.5V31.5L22 41L5 31.5V12.5Z" fill="#E3A12F"/></svg><p><strong>Para los ojos.</strong> En la medicina tradicional maya es famosa por su uso en remedios para la vista.</p></div>
             <div><svg width="24" height="24" viewBox="0 0 44 44" class="hex" aria-hidden="true"><path d="M22 3L39 12.5V31.5L22 41L5 31.5V12.5Z" fill="#E3A12F"/></svg><p><strong>Antioxidante y antibacteriana.</strong> Diversos estudios han encontrado estas propiedades en la miel de melipona.</p></div>
           </div>
+          <p class="nota">Usos tradicionales; no sustituyen la opinión de un médico.</p>
         </div>
       </section>
       <section class="disfrutar">
@@ -350,7 +378,39 @@ body.bloqueado{overflow:hidden}
   }
   acomodar(); (mq.addEventListener?mq.addEventListener('change',acomodar):mq.addListener(acomodar));
 
-  abrir.addEventListener('click',function(){ carta.classList.add('abierta'); carta.scrollTop=0; entrar.focus({preventScroll:true}); });
+  // ===== CONTADOR =====
+  // Momento en que se puede abrir la carta (hora de Cancún, UTC-05:00).
+  // Para cambiarlo, edita solo esta línea.
+  var APERTURA = new Date('2026-11-07T12:00:00-05:00').getTime();
+
+  var hh=document.getElementById('hh'), mm=document.getElementById('mm'), ss=document.getElementById('ss');
+  var aviso=document.getElementById('aviso'), timer=null, avisoT=null;
+  function dos(n){ return (n<10?'0':'')+n; }
+  function bloqueada(){ return Date.now() < APERTURA; }
+  function tic(){
+    var falta=APERTURA-Date.now();
+    if(falta<=0){
+      clearInterval(timer); carta.classList.remove('cerrada');
+      abrir.setAttribute('aria-label','Abrir la carta');
+      return;
+    }
+    var s=Math.floor(falta/1000);
+    hh.textContent=dos(Math.floor(s/3600)); mm.textContent=dos(Math.floor(s%3600/60)); ss.textContent=dos(s%60);
+  }
+  if(bloqueada()){
+    carta.classList.add('cerrada');
+    abrir.setAttribute('aria-label','La carta aún no se puede abrir');
+    tic(); timer=setInterval(tic,1000);
+  }
+
+  abrir.addEventListener('click',function(){
+    if(bloqueada()){
+      abrir.classList.remove('tiembla'); void abrir.offsetWidth; abrir.classList.add('tiembla');
+      aviso.classList.add('ver'); clearTimeout(avisoT); avisoT=setTimeout(function(){ aviso.classList.remove('ver'); },2500);
+      return;
+    }
+    carta.classList.add('abierta'); carta.scrollTop=0; entrar.focus({preventScroll:true});
+  });
   entrar.addEventListener('click',function(){
     carta.classList.add('oculta'); document.body.classList.remove('bloqueado'); window.scrollTo(0,0);
   });
