@@ -1,0 +1,19 @@
+AMORA · sitio para Paula
+========================
+
+Contenido:
+  index.html   -> la página (carta sellada + recorrido; se adapta sola a celular y computadora)
+  img/         -> imágenes (etiqueta, sello, panal, iconos)
+
+Cómo subirlo:
+1. Descomprime este .zip.
+2. En tu hosting (cPanel > Administrador de archivos, o por FTP), entra a la carpeta
+   pública (normalmente public_html) o a una subcarpeta, por ejemplo public_html/amora
+3. Sube index.html y la carpeta img/ tal cual, conservando la estructura.
+4. Abre la dirección en tu navegador para probar, p. ej. https://tudominio.com/amora/
+5. Esa dirección es la que va en el QR de la etiqueta.
+
+Notas:
+- La página no aparece en buscadores (tiene "noindex").
+- Las tipografías Arvo y Lora se cargan de Google Fonts al abrirla con internet.
+- Para cambiar un texto, abre index.html con cualquier editor de texto y búscalo.
